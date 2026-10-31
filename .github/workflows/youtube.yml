@@ -1,0 +1,29 @@
+name: Neueste Videos
+
+on:
+  schedule:
+    - cron: "17 5 * * *" # täglich um 05:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Videoliste aktualisieren
+        run: python3 scripts/update_videos.py
+
+      - name: Änderungen committen
+        run: |
+          if git diff --quiet README.md; then
+            echo "Keine neuen Videos."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Neueste Videos aktualisiert"
+          git push
